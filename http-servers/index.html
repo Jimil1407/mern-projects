@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>CORS</title>
+    <h1>Practicing CORS</h1>
+    <script src = "https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        function sendreq(url){
+            console.log("http://localhost:3000/"+url);
+            axios.post("http://localhost:3000/"+url,{
+                a:document.getElementById('a').value,
+                b:document.getElementById('b').value
+            }).then(response=>{
+                result.textContent = response.data.ans;
+            })  
+            .catch(error=>{
+                console.error('Error:',error);
+            });
+        }
+    </script>
+</head>
+<body>
+    <script type="module" src="exp-mid.js"></script>
+    <input type="text" id="a" placeholder="Enter a">
+    <input type=""text" id="b" placeholder="Enter b">
+    <button id="addButton">Add</button>
+    <button id="subtractButton">Subtract</button>
+    <p id="result"></p>
+    <script>
+        const addButton = document.getElementById('addButton');
+        const subtractButton = document.getElementById('subtractButton');
+        const result = document.getElementById('result');
+        addButton.addEventListener('click',()=>{
+            sendreq('add');
+            
+        });
+        subtractButton.addEventListener('click',()=>{
+            sendreq('subtract');
+            
+        });
+    </script>
+
+</body>
+</html>
