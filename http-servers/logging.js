@@ -7,7 +7,7 @@ function logs(req,res,next){
     const requrl = req.url;
     const method = req.method;
     const timestamp = new Date().toISOString();
-    const httpstatus = res.statusCode;
+    const httpstatus = res.statusCode; 
     console.log(`${timestamp} - ${method} ${requrl} - ${httpstatus}`);
     next();
 }
