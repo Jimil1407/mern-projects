@@ -1,63 +1,80 @@
-const express = require('express');
-const jwt = require('jsonwebtoken');
+const express = require("express");
+const jwt = require("jsonwebtoken");
 
 const app = express();
 app.use(express.json());
 const secretKey = "jimil";
-const users = [
-];
+const users = [];
 
-app.get("/me", (req, res) => {
-    const token = req.headers.authorization;
-    const decoded = jwt.verify(token, secretKey);
+function authenticateToken(req, res, next) {
+  const token = req.headers.authorization;
 
-    const username = decoded.username;
-    if(users.find(user => user.username === username)) {
-        res.send({
-            username: username,
-            password: users.find(user => user.username === username).password
-        })
-    } else {
+  if (token) {
+    jwt.verify(token, secretKey, (err, jimil) => {
+      if (err) {
         res.status(401).send({
-            message: "Unauthorized"
-        })
-    }
-})
+          message: "Unauthorized",
+        });
+      } else {
+        req.user = jimil;
+        next();
+      }
+    });
+  } else {
+    res.status(401).send({
+      message: "Unauthorized",
+    });
+  }
+}
 
-app.post("/signin", (req, res) => {
-    const username = req.body.username;
-    const password = req.body.password;
+app.get("/me", authenticateToken ,(req, res) => {
+    const user = req.user;
+    console.log(user);
+    res.send({
+        username: user
+    })
 
-    const user = users.find(user => user.username === username && user.password === password);
-
-    if (user) {
-        const token = jwt.sign({
-            username: user.username
-        }, secretKey);
-
-        user.token = token;
-        res.send({
-            token
-        })
-        console.log(users);
-    } else {
-        res.status(403).send({
-            message: "Invalid username or password"
-        })
-    }
 });
 
-app.post("/signup",(req,res)=>{
-    const {username, password} = req.body;
-    if(users.find(user => user.username === username)) {
-        res.status(400).send("Account already exists");
-    } else{
-        const token = jwt.sign({username}, secretKey);
-        users.push({username, password, token});
-        res.status(200).send("Signup successful");
-    }
-})
+app.post("/signin", (req, res) => {
+  const username = req.body.username;
+  const password = req.body.password;
 
-app.listen(3000,()=> {
-    console.log("Server is running on port 3000");
-})
+  const user = users.find(
+    (user) => user.username === username && user.password === password
+  );
+
+  if (user) {
+    const token = jwt.sign(
+      {
+        username: user.username,
+      },
+      secretKey
+    );
+
+    user.token = token;
+    res.send({
+      token,
+    });
+    console.log(users);
+  } else {
+    res.status(403).send({
+      message: "Invalid username or password",
+    });
+  }
+});
+
+app.post("/signup", (req, res) => {
+  const { username, password } = req.body;
+  if (users.find((user) => user.username === username)) {
+    res.status(400).send("Account already exists");
+  } else {
+    const token = jwt.sign({ username }, secretKey);
+    users.push({ username, password, token });
+    res.status(200).send("Signup successful");
+  }
+});
+
+app.listen(3000, () => {
+  console.log("Server is running on port 3000");
+});
