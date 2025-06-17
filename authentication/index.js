@@ -1,8 +1,15 @@
 const express = require("express");
 const jwt = require("jsonwebtoken");
+const cors = require("cors");
 
 const app = express();
 app.use(express.json());
+// Configure CORS to allow requests from any origin during development
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 const secretKey = "jimil";
 const users = [];
 
@@ -31,7 +38,7 @@ app.get("/me", authenticateToken ,(req, res) => {
     const user = req.user;
     console.log(user);
     res.send({
-        username: user
+        username: user.username
     })
 
 });
