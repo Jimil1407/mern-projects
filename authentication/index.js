@@ -10,17 +10,12 @@ const users = [
 app.get("/me", (req, res) => {
     const token = req.headers.authorization;
     const decoded = jwt.verify(token, secretKey);
-    const user = users.find(user => user.username === decoded.username);
-    if (user) {
-        console.log(user.username);
-        res.send({
-            username: user.username,
-        })
-    } else {
-        res.status(401).send({
-            message: "Unauthorized"
-        })
-    }
+
+    const username = decoded.username;
+    console.log(username);
+    res.send({
+        username
+    })
 })
 
 app.post("/signin", (req, res) => {
