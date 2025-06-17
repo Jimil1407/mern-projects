@@ -12,6 +12,7 @@ app.use(cors({
 }));
 const secretKey = "jimil";
 const users = [];
+const todos = [];
 
 function authenticateToken(req, res, next) {
   const authHeader = req.headers.authorization;
@@ -30,8 +31,10 @@ function authenticateToken(req, res, next) {
       });
     }
     req.user = user;
-    req.password = users.find(user => user.username === user.username).password;
-
+    const foundUser = users.find(u => u.username === user.username);
+    if (foundUser) {
+      req.password = foundUser.password;
+    }
     next();
   });
 }
@@ -83,6 +86,41 @@ app.post("/signup", (req, res) => {
     users.push({ username, password, token });
     res.status(200).send("Signup successful");
   }
+});
+
+app.post("/todo", authenticateToken, (req, res) => {
+  const { title, description } = req.body;
+  const todoId = Date.now().toString(); // Generate a unique ID
+  todos.push({ _id: todoId, title, description });
+  res.status(200).send("Todo created successfully");
+});
+
+app.get("/todos", authenticateToken, (req, res) => {
+  res.status(200).send(todos);
+});
+
+app.put("/update-todo", authenticateToken, (req, res) => {
+  const { todoId, title, description } = req.body;
+  const todoIndex = todos.findIndex(todo => todo._id === todoId);
+  
+  if (todoIndex === -1) {
+    return res.status(404).send("Todo not found");
+  }
+  
+  todos[todoIndex] = { ...todos[todoIndex], title, description };
+  res.status(200).send("Todo updated successfully");
+});
+
+app.delete("/delete-todo", authenticateToken, (req, res) => {
+  const { todoId } = req.body;
+  const todoIndex = todos.findIndex(todo => todo._id === todoId);
+  
+  if (todoIndex === -1) {
+    return res.status(404).send("Todo not found");
+  }
+  
+  todos.splice(todoIndex, 1);
+  res.status(200).send("Todo deleted successfully");
 });
 
 app.listen(3000, () => {

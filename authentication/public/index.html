@@ -2,6 +2,128 @@
 <html lang="en">
   <head>
     <title>Auth Website</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      body {
+        background-color: #f5f5f5;
+        padding: 20px;
+        max-width: 800px;
+        margin: 0 auto;
+      }
+
+      h1 {
+        color: #333;
+        text-align: center;
+        margin-bottom: 30px;
+        padding: 20px 0;
+        border-bottom: 2px solid #eee;
+      }
+
+      input {
+        padding: 10px;
+        margin: 5px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        width: 200px;
+      }
+
+      button {
+        padding: 10px 20px;
+        margin: 5px;
+        border: none;
+        border-radius: 4px;
+        background-color: #007bff;
+        color: white;
+        cursor: pointer;
+        transition: background-color 0.3s;
+      }
+
+      button:hover {
+        background-color: #0056b3;
+      }
+
+      #signin-form, #signup-form {
+        background-color: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+      }
+
+      #todos {
+        background-color: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      }
+
+      .todo-item {
+        display: flex;
+        align-items: center;
+        padding: 15px;
+        border-bottom: 1px solid #eee;
+        gap: 10px;
+      }
+
+      .todo-item:last-child {
+        border-bottom: none;
+      }
+
+      .todo-item span {
+        flex-grow: 1;
+      }
+
+      .todo-item button {
+        padding: 5px 10px;
+        font-size: 0.9em;
+      }
+
+      .todo-item button:first-of-type {
+        background-color: #28a745;
+      }
+
+      .todo-item button:last-of-type {
+        background-color: #dc3545;
+      }
+
+      .todo-item button:first-of-type:hover {
+        background-color: #218838;
+      }
+
+      .todo-item button:last-of-type:hover {
+        background-color: #c82333;
+      }
+
+      #information {
+        background-color: white;
+        padding: 15px;
+        border-radius: 4px;
+        margin: 20px 0;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      }
+
+      #todo-item {
+        margin-top: 20px;
+      }
+
+      .create-todo {
+        background-color: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+      }
+
+      .create-todo input {
+        width: calc(50% - 10px);
+      }
+    </style>
     <h1>Auth frontend</h1>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script>
@@ -35,10 +157,81 @@
         }
       }
 
+      async function createTodo() {
+        const token = localStorage.getItem("token");
+        const title = document.getElementById("todo-title").value;
+        const description = document.getElementById("todo-description").value;
+        const response = await axios.post("http://localhost:3000/todo", 
+          {
+            title: title,
+            description: description
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          }
+        );
+        alert("Todo created successfully");
+      }
+
+      async function getTodos() {
+        const token = localStorage.getItem("token");    
+        const response = await axios.get("http://localhost:3000/todos", {
+          headers: {
+            Authorization: `Bearer ${token}`
+          },
+        });
+        document.getElementById("todo-item").innerHTML = response.data.map(todo => `
+          <div class="todo-item">
+            <span>${todo.title} - ${todo.description}</span>
+            <button onclick="updateTodo('${todo._id}', '${todo.title}', '${todo.description}')">Update</button>
+            <button onclick="deleteTodo('${todo._id}')">Delete</button>
+          </div>
+        `).join("");
+      }
+
       async function logout() {
         localStorage.removeItem("token");
         document.getElementById("information").innerHTML = ""; // Clear user info on logout
         showAuthForms(); // Show auth forms after logout
+      }
+
+      async function updateTodo(todoId, currentTitle, currentDescription) {
+        const token = localStorage.getItem("token");
+        const title = prompt("Enter new title:", currentTitle);
+        const description = prompt("Enter new description:", currentDescription);
+        
+        if (title === null || description === null) return; // User cancelled
+
+        const response = await axios.put("http://localhost:3000/update-todo", 
+          {
+            todoId: todoId,
+            title: title,
+            description: description
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          }
+        );
+        alert("Todo updated successfully");
+        getTodos(); // Refresh the todo list
+      }
+
+      async function deleteTodo(todoId) {
+        const token = localStorage.getItem("token");
+        if (!confirm("Are you sure you want to delete this todo?")) return;
+
+        const response = await axios.delete("http://localhost:3000/delete-todo", {
+          data: { todoId: todoId },
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        alert("Todo deleted successfully");
+        getTodos(); // Refresh the todo list
       }
 
       function hideAuthForms() {
@@ -94,12 +287,23 @@
       <button type="submit" onclick="signup()">Sign up</button>
     </div>
 
-    <div>
+    <div id="information">
       User information: 
       <div id="information"></div>
     </div>
     <div>
       <button onclick="logout()">Logout</button>
+    </div>
+
+    <div class="create-todo">
+      <input type="text" id="todo-title" placeholder="Title" />
+      <input type="text" id="todo-description" placeholder="Description" />
+      <button onclick="createTodo()">Create Todo</button>
+    </div>
+
+    <div id="todos">
+        <button onclick="getTodos()">Get Todos</button>
+        <div id="todo-item"></div>  
     </div>
   </body>
 </html>
