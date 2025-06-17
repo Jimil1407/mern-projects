@@ -14,33 +14,36 @@ const secretKey = "jimil";
 const users = [];
 
 function authenticateToken(req, res, next) {
-  const token = req.headers.authorization;
+  const authHeader = req.headers.authorization;
+  const token = authHeader && authHeader.split(' ')[1]; // Extract token from "Bearer TOKEN"
 
-  if (token) {
-    jwt.verify(token, secretKey, (err, jimil) => {
-      if (err) {
-        res.status(401).send({
-          message: "Unauthorized",
-        });
-      } else {
-        req.user = jimil;
-        next();
-      }
-    });
-  } else {
-    res.status(401).send({
-      message: "Unauthorized",
+  if (!token) {
+    return res.status(401).send({
+      message: "No token provided",
     });
   }
+
+  jwt.verify(token, secretKey, (err, user) => {
+    if (err) {
+      return res.status(401).send({
+        message: "Invalid token",
+      });
+    }
+    req.user = user;
+    req.password = users.find(user => user.username === user.username).password;
+
+    next();
+  });
 }
 
 app.get("/me", authenticateToken ,(req, res) => {
     const user = req.user;
+    const password = req.password;
     console.log(user);
     res.send({
-        username: user.username
-    })
-
+        username: user.username,
+        password: password
+    });
 });
 
 app.post("/signin", (req, res) => {

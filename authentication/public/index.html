@@ -15,68 +15,90 @@
         });
         alert("Signed up successfully");
       }
-    </script>
-    <script>
+    
       async function signin() {
         const username = document.getElementById("signin-username").value;
         const password = document.getElementById("signin-password").value;
 
-        const response = await axios.post("http://localhost:3000/signin", {
-          username: username,
-          password: password,
-        });
+        try {
+          const response = await axios.post("http://localhost:3000/signin", {
+            username: username,
+            password: password,
+          });
 
-        localStorage.setItem("token", response.data.token);
-
-        alert("Signed in successfully");
+          localStorage.setItem("token", response.data.token);
+          alert("Signed in successfully");
+          await getUserInformation(); // Automatically fetch user info after signin
+          hideAuthForms(); // Hide auth forms after successful signin
+        } catch (error) {
+          alert("Sign in failed: " + (error.response?.data?.message || "Unknown error"));
+        }
       }
-    </script>
-    <script>
+
       async function logout() {
         localStorage.removeItem("token");
+        document.getElementById("information").innerHTML = ""; // Clear user info on logout
+        showAuthForms(); // Show auth forms after logout
       }
-    </script>
 
-    <script>
+      function hideAuthForms() {
+        document.getElementById("signin-form").style.display = "none";
+        document.getElementById("signup-form").style.display = "none";
+      }
+
+      function showAuthForms() {
+        document.getElementById("signin-form").style.display = "block";
+        document.getElementById("signup-form").style.display = "block";
+      }
+
       async function getUserInformation() {
         const token = localStorage.getItem("token");
 
         if (token) {
-          const response = await axios.get("http://localhost:3000/me", {
-            headers: {
-              Authorization: token,
-            },
-          });
-          console.log(response.data);
-          document.getElementById("information").innerHTML =
-            response.data.username;
-          document.getElementById("userInfo").style.display = "block";
-          document.getElementById("logout").style.display = "block";
+          try {
+            const response = await axios.get("http://localhost:3000/me", {
+              headers: {
+                Authorization: `Bearer ${token}`
+              },
+            });
+            document.getElementById("information").innerHTML = "Username: " + response.data.username + " Password: " + response.data.password;
+            hideAuthForms(); // Hide auth forms when user is logged in
+          } catch (error) {
+            console.error("Error fetching user info:", error);
+            document.getElementById("information").innerHTML = "";
+            showAuthForms(); // Show auth forms if token is invalid
+          }
+        } else {
+          document.getElementById("information").innerHTML = "";
+          showAuthForms(); // Show auth forms when no token exists
         }
+      }
+
+      // Check for user info when page loads
+      window.onload = function() {
+        getUserInformation();
       }
     </script>
   </head>
 
 
   <body>
-    <div>
+    <div id="signin-form">
       <input type="text" id="signin-username" placeholder="Username" />
       <input type="password" id="signin-password" placeholder="Password" />
       <button type="submit" onclick="signin()">Sign in</button>
     </div>
-    <div>
+    <div id="signup-form">
       <input type="text" id="signup-username" placeholder="Username" />
       <input type="password" id="signup-password" placeholder="Password" />
       <button type="submit" onclick="signup()">Sign up</button>
-      
     </div>
 
-    <div id="userInfo">
-      User Info:
-      <p id="information"></p>
-      <button onclick="getUserInformation()">Get User Information</button>
+    <div>
+      User information: 
+      <div id="information"></div>
     </div>
-    <div id="logout">
+    <div>
       <button onclick="logout()">Logout</button>
     </div>
   </body>
