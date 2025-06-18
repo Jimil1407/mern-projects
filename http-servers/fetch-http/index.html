@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <p>Fetching data from an API</p>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+</head>
+<body>
+    <script>
+        axios.get("https://jsonplaceholder.typicode.com/posts/1")
+        .then(response => response.data)
+        .then(data => document.getElementById('data').innerHTML = data.title + " " + data.body)
+        .catch(error => console.error('Error:', error));
+    </script>
+    <p id="data"></p>
+
+</body>
+</html>
