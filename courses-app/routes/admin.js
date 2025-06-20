@@ -5,9 +5,31 @@ const jwt = require("jsonwebtoken");
 const JWT_ADMIN_PASSWORD = process.env.JWT_ADMIN_PASSWORD;
 const { adminMiddleware } = require("../middleware/admin");
 const bcrypt = require("bcrypt");
+const { z } = require("zod");
+
+const adminSignupSchema = z.object({
+
+    email: z.string().email(),
+    password: z.string().min(8),
+    firstName: z.string().min(1),
+    lastName: z.string().min(1)
+})
+
+const adminLoginSchema = z.object({
+    email: z.string().email(),
+    password: z.string().min(8)
+})
+
+const courseSchema = z.object({
+
+    title: z.string().min(1),
+    description: z.string().min(1),
+    imageUrl: z.union([z.string().url(), z.string().min(1)]),
+    price: z.number().min(0)
+})
 
 adminRouter.post("/signup", async function(req, res) {
-    const { email, password, firstName, lastName } = req.body; // TODO: adding zod validation
+    const { email, password, firstName, lastName } = adminSignupSchema.parse(req.body); // TODO: adding zod validation
     // TODO: hash the password so plaintext pw is not stored in the DB
 
     // TODO: Put inside a try catch block
@@ -25,7 +47,7 @@ adminRouter.post("/signup", async function(req, res) {
 })
 
 adminRouter.post("/signin", async function(req, res) {
-    const { email, password } = req.body;
+    const { email, password } = adminLoginSchema.parse(req.body);
 
     // TODO: ideally password should be hashed, and hence you cant compare the user provided password and the database password
     const admin = await adminModel.findOne({
@@ -54,7 +76,7 @@ adminRouter.post("/signin", async function(req, res) {
 adminRouter.post("/course", adminMiddleware, async function(req, res) {
     const adminId = req.userId;
 
-    const { title, description, imageUrl, price } = req.body;
+    const { title, description, imageUrl, price } = courseSchema.parse(req.body);
 
     // creating a web3 saas in 6 hours
     const course = await courseModel.create({
@@ -74,7 +96,7 @@ adminRouter.post("/course", adminMiddleware, async function(req, res) {
 adminRouter.put("/course", adminMiddleware, async function(req, res) {
     const adminId = req.userId;
 
-    const { title, description, imageUrl, price, courseId } = req.body;
+    const { title, description, imageUrl, price, courseId } = courseSchema.parse(req.body);
 
     // creating a web3 saas in 6 hours
     const course = await courseModel.updateOne({
