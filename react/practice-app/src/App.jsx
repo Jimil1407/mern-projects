@@ -3,6 +3,7 @@ import './App.css'
 import { PostComponent } from '../components/post'
 import ToggleMessage from '../components/notifications'
 import Topbar from '../components/navbar'
+import Timer from '../components/countdown'
 
 function App() {
   const [posts, setPosts] = useState([]);
@@ -41,7 +42,7 @@ function App() {
   //  <Topbar/>
   // </div>
   <div>
-    
+    {/* <Timer/> */}
   </div>
 
   )
