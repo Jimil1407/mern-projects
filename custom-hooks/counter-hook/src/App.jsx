@@ -1,23 +1,20 @@
 import "./App.css";
 import { useEffect, useState } from "react";
 import { useFetch } from "./hooks/useFetch";
+import { usePrev } from "./hooks/usePrev";
 
 function App() {
 
   const [value, setValue] = useState(1);
-  const { data, loading, error } = useFetch(
-    "https://jsonplaceholder.typicode.com/todos/" + value
-  );
+  const prev = usePrev(value);
 
   return (
-    <div>
-      <button onClick={() => setValue(1)}>1</button>
-      <button onClick={() => setValue(2)}>2</button>
-      <button onClick={() => setValue(3)}>3</button>
-      {loading && <p>Loading...</p>}
-      {error && <p>Error: {error.message}</p>}
-      <pre>{JSON.stringify(data, null, 2)}</pre>
-    </div>
+    <>
+    <button onClick={() => setValue(c => c+1)}>
+      Current value is {value}</button>
+      <p>Previous value is {prev}</p>
+
+    </>
   );
 }
 
