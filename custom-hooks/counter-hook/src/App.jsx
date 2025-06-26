@@ -2,18 +2,30 @@ import "./App.css";
 import { useEffect, useState } from "react";
 import { useFetch } from "./hooks/useFetch";
 import { usePrev } from "./hooks/usePrev";
+import useDebounce from "./hooks/useDebounce";
 
 function App() {
 
-  const [value, setValue] = useState(1);
-  const prev = usePrev(value);
+  const delay = 200
+  const [inputVal, setInputval] = useState();
+  const debounceValue = useDebounce(inputVal,delay);
+
+  function expensive(){
+    console.log("expensive operation")
+  }
+
+  function change(e){
+    setInputval(e.target.value);
+  }
+
+  useEffect(() => {
+    expensive();
+  },[debounceValue])
+
 
   return (
     <>
-    <button onClick={() => setValue(c => c+1)}>
-      Current value is {value}</button>
-      <p>Previous value is {prev}</p>
-
+    <input id="input" type="text" onChange={change} placeholder="Enter text" />
     </>
   );
 }
