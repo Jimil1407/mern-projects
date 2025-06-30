@@ -1,35 +1,39 @@
 import React, {  useEffect  } from 'react';
 import { RecoilRoot, useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
-import { notifications, totalNotificationSelector } from './atoms';
-import axios from 'axios';
+import {counter} from "./atoms";
 // App Component
 function App() {
   return <RecoilRoot>
-    
+    <Counter/>
   </RecoilRoot>
 };
 
-function MainApp(){
-  const [networkCount, setNetworkCount] = useRecoilState(notifications);
-  const totalNotificationCount = useRecoilValue(totalNotificationSelector);
+function Buttons(){
+  const setCount = useSetRecoilState(counter);
 
-  useEffect(() => {
-    axios.get("https://sum-server.100xdevs.com/notifications")
-    .then(res => {
-      setNetworkCount(res.data);
-    })
-  },[])
+  function increase(){
+    setCount(c => c+1);
+  }
 
-  return (
-    <>
-      <button>Home</button>
-      <button>My network ({networkCount.networks >= 100 ? "99+" : networkCount.networks})</button>
-      <button>Jobs {networkCount.jobs}</button>
-      <button>Messaging ({networkCount.messaging})</button>
-      <button>Notifications ({networkCount.notifications})</button>
-      <button>Me ({totalNotificationCount})</button>
-    
-    </>
+  function decrease(){
+    setCount(c => c-1);
+  }
+
+  return(
+    <div>
+      <button onClick={increase}>Increase</button>
+      <button onClick={decrease}>Decrease</button>
+    </div>
   )
+}
+
+function Counter(){
+  const count = useRecoilValue(counter);
+
+  return <div>
+    {count}
+    <Buttons/>
+  </div>
+
 }
 export default App;
