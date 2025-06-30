@@ -9,7 +9,7 @@ function App() {
 };
 
 function Buttons(){
-  const setCount = useSetRecoilState(counter);
+  const [count , setCount] = useRecoilState(counter);
 
   function increase(){
     setCount(c => c+1);
