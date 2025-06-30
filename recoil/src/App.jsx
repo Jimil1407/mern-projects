@@ -1,18 +1,28 @@
 import React, {  useEffect  } from 'react';
 import { RecoilRoot, useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
-import {counter} from "./atoms";
+import {counter, even} from "./atoms";
+import { memo } from 'react';
 // App Component
 function App() {
   return <RecoilRoot>
     <Counter/>
+    <IsEven/>
   </RecoilRoot>
 };
 
-function Buttons(){
-  const [count , setCount] = useRecoilState(counter);
+function IsEven () {
+  const isEven = useRecoilValue(even);
+
+  return <div>
+    {isEven ? "Even" : "Odd"}
+  </div>
+}
+
+const Buttons =memo(function(){
+  const setCount = useSetRecoilState(counter);
 
   function increase(){
-    setCount(c => c+1);
+    setCount(c => c+2);
   }
 
   function decrease(){
@@ -25,7 +35,7 @@ function Buttons(){
       <button onClick={decrease}>Decrease</button>
     </div>
   )
-}
+})
 
 function Counter(){
   const count = useRecoilValue(counter);
