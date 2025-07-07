@@ -28,12 +28,10 @@ app.post("/signup", async (req, res) => {
 app.get("/users", async (req, res) => {
   const id = req.query.id;
   await client.connect();
-  const result = await client.query(`SELECT * FROM users where id = $1;`, [id]);
-  const address = await client.query(
-    `SELECT * FROM addresses where user_id = $1;`,
-    [id]
-  );
-  res.json({ user: result.rows[0], address: address.rows });
+  const result = await client.query(`SELECT users.username, addresses.city, addresses.country, addresses.street, addresses.pincode
+FROM users INNER JOIN addresses ON users.id = addresses.user_id;`);
+ 
+  res.json({ result: result.rows });
   await client.end();
 });
 
