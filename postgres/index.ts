@@ -1,13 +1,12 @@
 // write a function to create a users table in your database.
 import { Client } from "pg";
 import express from "express";
-
+    
 const app = express();
 app.use(express.json());
 
 const client = new Client({
-  connectionString:
-    "postgresql://neondb_owner:npg_O56ZQfjWeKBy@ep-ancient-voice-a80enuhl-pooler.eastus2.azure.neon.tech/neondb?sslmode=require&channel_binding=require",
+  connectionString: process.env.DATABASE_URL,
 });
 
 app.post("/signup", async (req, res) => {
