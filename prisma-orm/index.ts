@@ -15,12 +15,15 @@ async function createUser() {
   console.log(user);
 }
 
+//createUser();
+
 async function createTodo() {
   const todo = await client.todo.create({
     data: {
-      title: "gym",
-      description: "go to gym",
-      completed: true,
+      title: "coding",
+      description: "go to coding",
+      completed: false,
+      userId: "658aa03a-e31c-42e7-b060-bf77fa65de73",
     },
   });
   console.log(todo);
@@ -31,7 +34,10 @@ async function createTodo() {
 async function findUser() {
   const user = await client.user.findFirst({
     where: {
-      username: "joh_doe",
+      username: "john_doe",
+    },
+    include: {
+      todos: true,
     },
   });
   console.log(user);
