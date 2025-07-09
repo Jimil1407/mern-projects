@@ -1,7 +1,7 @@
 export default function Blogs(){
 	return(
 		<div>
-		hey blogs !
+		hey user !
 		</div> 
 	)
 }
