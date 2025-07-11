@@ -62,6 +62,20 @@ app.delete('/delete/:id', async (req, res) => {
     res.send('Note deleted successfully')
 })
 
+// assuming Express.js
+app.put("/update/:id", async (req, res) => {
+    const { id } = req.params;
+    const { title, description } = req.body;
+  
+    try {
+      await pool.query("UPDATE notes SET title = $1, description = $2 WHERE id = $3", [title, description, id]);
+      res.status(200).json({ message: "Note updated successfully" });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: "Failed to update note" });
+    }
+  });
+  
 app.listen(3001, () => {
     console.log('Server is running on port 3001')
 })
