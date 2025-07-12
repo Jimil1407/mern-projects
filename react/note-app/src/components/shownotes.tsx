@@ -2,11 +2,14 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { useRecoilState } from "recoil";
 import { notesAtom } from "./recoil/atom";
+import AddNotes from "./addnotes";
+import { useNavigate } from "react-router-dom";
+import AuthPage, { supabase } from "./authPage";
 
 export default function ShowNotes() {
   const [notesState, setNotesState] = useRecoilState(notesAtom);
   const [editingId, setEditingId] = useState<string | null>(null);
-
+  const navigate = useNavigate();
   const cardColors = [
     "bg-yellow-900/60",
     "bg-orange-900/60",
@@ -48,15 +51,25 @@ export default function ShowNotes() {
     });
   };
 
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate('/auth');
+  };
+
   useEffect(() => {
     fetchNotes();
   }, []);
 
   return (
-    <div className="w-full px-2 sm:px-6 md:px-12 lg:px-24 xl:px-32 bg-black">
+    <div className="w-full px-2 sm:px-6 md:px-12 lg:px-24 xl:px-32 bg-black min-h-screen">
+      <h1 className="text-4xl font-bold mb-8 text-gray-100 drop-shadow-lg">Notes App</h1>
+      <AddNotes />
+      <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" onClick={handleLogout}>Logout</button>
+      <h2 className="text-2xl font-bold mb-6 text-gray-100 mt-2">Your Notes</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 w-full">
         {notesState.map((note, idx) => (
           <div
+        
             key={note.id}
             className={`relative rounded-2xl shadow-lg p-6 min-h-[180px] flex flex-col transition hover:scale-105 duration-200 border border-gray-800 ${cardColors[idx % cardColors.length]}`}
           >
