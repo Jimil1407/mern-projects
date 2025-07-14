@@ -44,31 +44,7 @@ async function createUsers(){
 createUsers()
 createTable()
 
-// app.post('/signup', async (req, res) => {
-//     try{
-//         const {username, password} = req.body;
-//         const result = await pool.query(`
-//             INSERT INTO users (username, password) VALUES ($1, $2)
-//             `, [username, password])
-//             res.send('sign up succesfull')
-//         }catch(error){
-//             res.status(500).send("can't sign up");
-//         }
-// })
 
-// app.post('/signin', async (req, res) => {
-//     try{
-//         const {username, password} = req.body;
-//         const result = await pool.query(`
-//             SELECT EXISTS (SELECT username, password FROM users);
-//             `, [username, password])
-//             res.send('sign up succesfull')
-//         }catch(error){
-//             res.status(500).send("can't sign up");
-//         }
-// })
-
-// Extend Express Request type to include user
 interface AuthenticatedRequest extends Request {
     user?: any;
 }
@@ -141,21 +117,18 @@ app.put("/update/:id", async (req, res) => {
     }
   });
 
-// Register endpoint
+
 app.post('/signup', async (req, res) => {
     const { username, password } = req.body;
     if (!username || !password) {
         return res.status(400).json({ error: 'Email and password are required' });
     }
     try {
-        // Check if user already exists
         const userCheck = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
         if (userCheck.rows.length > 0) {
             return res.status(409).json({ error: 'User already exists' });
         }
-        // Hash password
         const hashedPassword = await bcrypt.hash(password, 10);
-        // Insert user
         await pool.query('INSERT INTO users (username, password) VALUES ($1, $2)', [username, hashedPassword]);
         res.status(201).json({ message: 'User registered successfully' });
         
@@ -165,25 +138,23 @@ app.post('/signup', async (req, res) => {
     }
 });
 
-// Login endpoint
+
 app.post('/signin', async (req, res) => {
     const { username, password } = req.body;
     if (!username || !password) {
         return res.status(400).json({ error: 'Email and password are required' });
     }
     try {
-        // Find user
+       
         const userResult = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
         if (userResult.rows.length === 0) {
             return res.status(401).json({ error: 'Invalid credentials' });
         }
         const user = userResult.rows[0];
-        // Compare password
         const valid = await bcrypt.compare(password, user.password);
         if (!valid) {
             return res.status(401).json({ error: 'Invalid credentials' });
         }
-        // Generate JWT
         const jwtSecret = process.env.JWT_SECRET;
         if (!jwtSecret) {
             throw new Error('JWT_SECRET environment variable is not set');

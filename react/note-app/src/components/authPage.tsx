@@ -20,7 +20,8 @@ export default function AuthPage() {
                 const data = await res.text();
                 throw new Error(data || 'Sign up failed');
             }
-            navigate('/');
+            alert('sign up succesfull, please login')
+            setMode('login');
         } catch (err: any) {
             setErrorMsg(err.message);
         }
