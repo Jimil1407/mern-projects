@@ -4,7 +4,7 @@ import { useRecoilState } from "recoil";
 import { notesAtom } from "./recoil/atom";
 import AddNotes from "./addnotes";
 import { useNavigate } from "react-router-dom";
-import AuthPage, { supabase } from "./authPage";
+import AuthPage  from "./authPage";
 
 export default function ShowNotes() {
   const [notesState, setNotesState] = useRecoilState(notesAtom);
@@ -52,7 +52,7 @@ export default function ShowNotes() {
   };
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    // If you store a token in localStorage, clear it here (e.g., localStorage.removeItem('token');)
     navigate('/auth');
   };
 

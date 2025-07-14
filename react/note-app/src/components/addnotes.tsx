@@ -9,7 +9,12 @@ export default function AddNotes() {
     const [notesState, setNotesState] = useRecoilState(notesAtom)
 
     const handleAddNote = () => {
-        axios.post('http://localhost:3001/submit', {title: title, description: description})
+        const token = localStorage.getItem('token');
+        axios.post('http://localhost:3001/submit', {title: title, description: description}, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        })
         .then(response => {
             console.log(response.data)
             axios.get('http://localhost:3001/showNotes')

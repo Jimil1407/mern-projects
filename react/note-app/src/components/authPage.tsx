@@ -1,10 +1,5 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { createClient } from '@supabase/supabase-js'
-
-const supabaseUrl = 'https://zyjnceujxilxzklewoce.supabase.co'
-// Use Vite's import.meta.env for frontend env variables
-export const supabase = createClient(supabaseUrl, import.meta.env.VITE_SUPABASE_KEY || '')
 
 export default function AuthPage() {
     const [email, setEmail] = useState('');
@@ -13,46 +8,54 @@ export default function AuthPage() {
     const [errorMsg, setErrorMsg] = useState('');
     const navigate = useNavigate();
 
-    const handlesignUp = async () => {
+    const handleSignUp = async () => {
         setErrorMsg('');
-        const { data, error } = await supabase.auth.signUp({
-            email: email,
-            password: password,
-        })
-        if (error) {
-            setErrorMsg(error.message);
-        } else {
-            setErrorMsg('');
-            console.log(data)
-            navigate('/')
+        try {
+            const res = await fetch('http://localhost:3001/signup', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: email, password }),
+            });
+            if (!res.ok) {
+                const data = await res.text();
+                throw new Error(data || 'Sign up failed');
+            }
+            navigate('/');
+        } catch (err: any) {
+            setErrorMsg(err.message);
         }
-    }
+    };
+
     const handleLogin = async () => {
         setErrorMsg('');
-        const { data, error } = await supabase.auth.signInWithPassword({
-        email: email,
-        password: password,
-        })
-      if (error) {
-        setErrorMsg(error.message);
-      } else {
-        setErrorMsg('');
-        console.log(data)
-        navigate('/')
-      }
-    }
+        try {
+            const res = await fetch('http://localhost:3001/signin', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: email, password }),
+            });
+            if (!res.ok) {
+                const data = await res.text();
+                throw new Error(data || 'Login failed');
+            }
+            const data = await res.json();
+            localStorage.setItem('token', data.token); // Save the token!
+            navigate('/');
+        } catch (err: any) {
+            setErrorMsg(err.message);
+        }
+    };
+
     return (
         <div className="min-h-screen flex items-center justify-center bg-black text-gray-100">
             <div className="w-full max-w-md bg-gray-900 rounded-2xl shadow-lg p-8 border border-gray-800">
                 <h1 className="text-3xl font-bold mb-6 text-center">Welcome</h1>
-                <div className="flex justify-center mb-6 gap-4">
-                 
-                </div>
+                <div className="flex justify-center mb-6 gap-4"></div>
                 {errorMsg && (
-  <div className="mb-4 text-center text-red-400 font-semibold">
-    {errorMsg}
-  </div>
-)}
+                    <div className="mb-4 text-center text-red-400 font-semibold">
+                        {errorMsg}
+                    </div>
+                )}
                 <div className="mb-8">
                     {mode === 'signup' ? (
                         <>
@@ -72,7 +75,7 @@ export default function AuthPage() {
                                 className="w-full mb-4 px-4 py-2 rounded-lg bg-gray-800 border border-gray-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
                             />
                             <button
-                                onClick={handlesignUp}
+                                onClick={handleSignUp}
                                 className="w-full py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow transition mb-2"
                             >
                                 Sign Up
