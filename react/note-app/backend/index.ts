@@ -105,18 +105,19 @@ app.post('/submit', authenticateToken, async (req: AuthenticatedRequest, res: Re
     }
 });
 
-app.get('/showNotes', async (req, res) => {
+app.get('/showNotes', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
     try {
-        const result = await pool.query(`
-            SELECT * FROM notes
-        `)
-        res.send(result.rows)
-        //console.log(result.rows)
+        const userId = req.user.userId;
+        const result = await pool.query(
+            `SELECT * FROM notes WHERE user_id = $1`,
+            [userId]
+        );
+        res.send(result.rows);
     } catch (error) {
-        console.error('Error fetching notes:', error)
-        res.status(500).send('Error fetching notes')
+        console.error('Error fetching notes:', error);
+        res.status(500).send('Error fetching notes');
     }
-})
+});
 
 app.delete('/delete/:id', async (req, res) => {
     const { id } = req.params

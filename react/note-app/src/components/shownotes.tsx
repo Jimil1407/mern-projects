@@ -46,7 +46,12 @@ export default function ShowNotes() {
   };
 
   const fetchNotes = () => {
-    axios.get("http://localhost:3001/showNotes").then((response) => {
+    const token = localStorage.getItem('token');
+    axios.get("http://localhost:3001/showNotes", {  
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    }).then((response) => {
       setNotesState(response.data);
     });
   };
