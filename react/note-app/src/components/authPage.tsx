@@ -8,7 +8,7 @@ export default function AuthPage() {
     const [errorMsg, setErrorMsg] = useState('');
     const navigate = useNavigate();
 
-    const handleSignUp = async () => {
+   const handleSignUp = async () => {
         setErrorMsg('');
         try {
             const res = await fetch('http://localhost:3001/signup', {

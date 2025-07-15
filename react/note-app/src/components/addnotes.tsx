@@ -8,26 +8,22 @@ export default function AddNotes() {
     const [description, setDescription] = useState('')
     const [notesState, setNotesState] = useRecoilState(notesAtom)
 
-    const handleAddNote = () => {
+    const handleAddNote = async () => {
         const token = localStorage.getItem('token');
-        axios.post('http://localhost:3001/submit', {title: title, description: description}, {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        })
-        .then(response => {
-            console.log(response.data)
-            axios.get('http://localhost:3001/showNotes')
-                .then(fetchResponse => {
-                    setNotesState(fetchResponse.data)
-                })
-            })
-            .catch(error => {
-                console.error('Error adding note:', error)
-            })
-            setTitle('')
-            setDescription('')
+        try {
+            await axios.post('http://localhost:3001/submit', { title, description }, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const fetchResponse = await axios.get('http://localhost:3001/showNotes', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            setNotesState(fetchResponse.data);
+            setTitle('');
+            setDescription('');
+        } catch (error) {
+            console.error('Error adding note:', error);
         }
+    };
     return (
         <div className="flex flex-col justify-center items-center w-full h-full min-h-[220px] bg-gray-900 border border-gray-800 rounded-2xl shadow-lg p-6 mb-6">
             <h2 className="text-xl font-semibold mb-4 text-gray-100">Add a Note</h2>

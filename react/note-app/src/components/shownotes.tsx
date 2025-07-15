@@ -11,14 +11,19 @@ export default function ShowNotes() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const navigate = useNavigate();
   const cardColors = [
-    "bg-yellow-900/60",
-    "bg-orange-900/60",
-    "bg-green-900/60",
-    "bg-blue-900/60",
-    "bg-purple-900/60",
-    "bg-pink-900/60",
-    "bg-teal-900/60",
+    "bg-yellow-200",
+    "bg-pink-200",
+    "bg-green-200",
+    "bg-blue-200",
+    "bg-purple-200",
+    "bg-orange-200",
+    "bg-teal-200",
   ];
+  // Helper for random rotation
+  const getRotation = (idx: number) => {
+    const rotations = ['-rotate-2', 'rotate-1', 'rotate-2', '-rotate-1', 'rotate-3', '-rotate-3', ''];
+    return rotations[idx % rotations.length];
+  };
 
   const handleDeleteNote = (id: string) => {
     axios
@@ -74,16 +79,21 @@ export default function ShowNotes() {
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 w-full">
         {notesState.map((note, idx) => (
           <div
-        
             key={note.id}
-            className={`relative rounded-2xl shadow-lg p-6 min-h-[180px] flex flex-col transition hover:scale-105 duration-200 border border-gray-800 ${cardColors[idx % cardColors.length]}`}
+            className={`relative rounded-xl shadow-xl p-6 min-h-[180px] flex flex-col transition hover:scale-105 duration-200 border border-yellow-100 ${cardColors[idx % cardColors.length]} ${getRotation(idx)} sticky-note`}
+            style={{
+              boxShadow: '0 8px 24px 0 rgba(0,0,0,0.10), 0 1.5px 6px 0 rgba(0,0,0,0.10)',
+              backgroundImage: 'repeating-linear-gradient(135deg, rgba(255,255,255,0.08) 0px, rgba(255,255,255,0.08) 2px, transparent 2px, transparent 8px)',
+            }}
           >
+            {/* Tape effect */}
+            <div className="absolute left-1/2 -translate-x-1/2 -top-3 w-16 h-4 bg-yellow-300 rounded opacity-80 z-10 border-b-2 border-yellow-400" style={{boxShadow: '0 2px 6px 0 rgba(0,0,0,0.10)'}}></div>
             {editingId === note.id ? (
               <>
-                <label className="text-xs text-gray-400 mb-1" htmlFor={`title-${note.id}`}>Title</label>
+                <label className="text-xs text-gray-500 mb-1" htmlFor={`title-${note.id}`}>Title</label>
                 <input
                   id={`title-${note.id}`}
-                  className="border rounded px-2 py-1 mb-2 font-bold text-lg bg-black text-gray-100 border-gray-700"
+                  className="border rounded px-2 py-1 mb-2 font-bold text-lg bg-white text-gray-900 border-gray-300"
                   value={note.title}
                   onChange={(e) =>
                     setNotesState(
@@ -93,10 +103,10 @@ export default function ShowNotes() {
                     )
                   }
                 />
-                <label className="text-xs text-gray-400 mb-1" htmlFor={`desc-${note.id}`}>Description</label>
+                <label className="text-xs text-gray-500 mb-1" htmlFor={`desc-${note.id}`}>Description</label>
                 <textarea
                   id={`desc-${note.id}`}
-                  className="border rounded px-2 py-1 mb-2 resize-none bg-black text-gray-100 border-gray-700"
+                  className="border rounded px-2 py-1 mb-2 resize-none bg-white text-gray-800 border-gray-300"
                   value={note.description}
                   onChange={(e) =>
                     setNotesState(
@@ -126,10 +136,11 @@ export default function ShowNotes() {
               </>
             ) : (
               <>
-                <div className="text-xs text-gray-400 mb-1">Title</div>
-                <div className="font-bold text-lg mb-2 text-gray-100">{note.title}</div>
-                <div className="text-xs text-gray-400 mb-1">Description</div>
-                <div className="text-gray-300 mb-4 flex-1">{note.description}</div>
+                <div className="text-xs text-gray-500 mb-1">Title</div>
+                <div className="font-extrabold text-xl mb-1 text-gray-900 leading-tight break-words">{note.title}</div>
+                <div className="w-full h-0.5 bg-yellow-300 opacity-60 my-2 rounded" />
+                <div className="text-xs text-gray-500 mb-1">Description</div>
+                <div className="text-base text-gray-800 mb-4 flex-1 leading-snug break-words">{note.description}</div>
                 <div className="absolute bottom-4 right-4 flex gap-2">
                   <button
                     className="rounded-full p-2 bg-black shadow hover:bg-blue-900/40"
