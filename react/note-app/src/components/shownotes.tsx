@@ -4,7 +4,6 @@ import { useRecoilState } from "recoil";
 import { notesAtom } from "./recoil/atom";
 import AddNotes from "./addnotes";
 import { useNavigate } from "react-router-dom";
-import AuthPage  from "./authPage";
 
 export default function ShowNotes() {
   const [notesState, setNotesState] = useRecoilState(notesAtom);
@@ -25,40 +24,56 @@ export default function ShowNotes() {
     return rotations[idx % rotations.length];
   };
 
-  const handleDeleteNote = (id: string) => {
-    axios
-      .delete(`http://localhost:3001/delete/${id}`)
-      .then((response) => {
-        console.log(response.data);
-        setNotesState(notesState.filter((note) => note.id !== id));
-      })
-      .catch((error) => {
-        console.error("Error deleting note:", error);
+  const handleDeleteNote = async (id: string) => {
+    const token = localStorage.getItem('token');
+    try{
+      const response = await axios.delete(`http://localhost:3001/delete/${id}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
       });
+      console.log(response.data);
+      setNotesState(notesState.filter((note) => note.id !== id));
+    } catch (error) {
+      console.error("Error deleting note:", error);
+    }
   };
 
-  const handleUpdateNote = (id: string, title: string, description: string) => {
-    axios
-      .put(`http://localhost:3001/update/${id}`, { title, description })
-      .then((response) => {
-        console.log(response.data);
-        setNotesState(
+  const handleUpdateNote = async (id: string, title: string, description: string) => {
+    const token = localStorage.getItem('token');
+    try{
+      const response = await axios.put(`http://localhost:3001/update/${id}`, { title, description }, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
+      console.log(response.data);
+      setNotesState(
           notesState.map((note) =>
             note.id === id ? { ...note, title, description } : note
           )
         );
-      });
+    } catch (error) {
+      console.error("Error updating note:", error);
+    }
   };
 
-  const fetchNotes = () => {
+  useEffect(() => {
+    fetchNotes();
+  }, []);
+
+  const fetchNotes = async () => {
     const token = localStorage.getItem('token');
-    axios.get("http://localhost:3001/showNotes", {  
+    try{
+      const response = await axios.get("http://localhost:3001/showNotes", {  
       headers: {
         Authorization: `Bearer ${token}`
       }
-    }).then((response) => {
+      });
       setNotesState(response.data);
-    });
+    } catch (error) {
+      console.error("Error fetching notes:", error);
+    }
   };
 
   const handleLogout = async () => {
@@ -66,9 +81,7 @@ export default function ShowNotes() {
     navigate('/auth');
   };
 
-  useEffect(() => {
-    fetchNotes();
-  }, []);
+  
 
   return (
     <div className="w-full px-2 sm:px-6 md:px-12 lg:px-24 xl:px-32 bg-black min-h-screen">
