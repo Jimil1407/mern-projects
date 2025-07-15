@@ -12,6 +12,7 @@ export default function ShowNotes() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [updateError, setUpdateError] = useState<{ [id: string]: string }>({});
   const navigate = useNavigate();
+  
   const cardColors = [
     "bg-yellow-200",
     "bg-pink-200",
@@ -22,7 +23,7 @@ export default function ShowNotes() {
     "bg-teal-200",
   ];
   const [deletingIds, setDeletingIds] = useState<string[]>([]);
-  // Helper for random rotation
+  
   const getRotation = (idx: number) => {
     const rotations = ['-rotate-2', 'rotate-1', 'rotate-2', '-rotate-1', 'rotate-3', '-rotate-3', ''];
     return rotations[idx % rotations.length];
@@ -32,10 +33,9 @@ export default function ShowNotes() {
     const token = localStorage.getItem('token');
     const previousNotes = notesState;
     setDeletingIds((prev) => [...prev, id]);
-    // Wait for fade-out animation before removing from state
     setTimeout(() => {
       setNotesState((prevNotes) => prevNotes.filter((note) => note.id !== id));
-    }, 350); // match animation duration
+    }, 350); 
 
     try {
       await axios.delete(`http://localhost:3001/delete/${id}`, {

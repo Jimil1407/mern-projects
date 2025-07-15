@@ -19,12 +19,13 @@ pool.connect()
 
 async function createTable(){
     const result = await pool.query(`
-        CREATE TABLE IF NOT EXISTS notes(
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        title VARCHAR(20) NOT NULL,
-        description VARCHAR(100) NOT NULL,
-        date TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-        user_id UUID REFERENCES users(id) ON DELETE CASCADE 
+       CREATE TABLE IF NOT EXISTS notes(
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      title VARCHAR(20) NOT NULL,
+      description VARCHAR(100) NOT NULL,
+      date TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+      user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+      category VARCHAR(20) DEFAULT 'Personal'
     )`
     );
     console.log('notes Table created successfully')
@@ -117,14 +118,14 @@ function authenticateToken(req: Request, res: Response, next: NextFunction) {
 
 app.post('/submit', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
     try {
-        const { title, description } = req.body;
+        const { title, description, category } = req.body;
         const userId = req.user.userId;
         if (!title || !description) {   
             return res.status(400).json({ error: 'Title and description are required' });
         }
         const result = await pool.query(
-            `INSERT INTO notes (title, description, user_id) VALUES ($1, $2, $3)`,
-            [title, description, userId]
+            `INSERT INTO notes (title, description, user_id, category) VALUES ($1, $2, $3, $4)`,
+            [title, description, userId, category || 'Personal']
         );
         res.send('Note added successfully');
     } catch (error) {

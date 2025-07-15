@@ -8,6 +8,7 @@ export default function AddNotes() {
     const [description, setDescription] = useState('')
     const [notesState, setNotesState] = useRecoilState(notesAtom)
     const [errorMsg, setErrorMsg] = useState('');
+    const [category, setCategory] = useState('Personal');
     // Clear error when user starts typing
     const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setTitle(e.target.value);
@@ -17,11 +18,14 @@ export default function AddNotes() {
         setDescription(e.target.value);
         if (errorMsg) setErrorMsg('');
     };
+    const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        setCategory(e.target.value);
+    };
 
     const handleAddNote = async () => {
         const token = localStorage.getItem('token');
         try {
-            await axios.post('http://localhost:3001/submit', { title, description }, {
+            await axios.post('http://localhost:3001/submit', { title, description, category }, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const fetchResponse = await axios.get('http://localhost:3001/showNotes', {
@@ -30,6 +34,7 @@ export default function AddNotes() {
             setNotesState(fetchResponse.data);
             setTitle('');
             setDescription('');
+            setCategory('Personal');
         } catch (error: any) {
             let message = 'Error adding note.';
             if (error.response && error.response.data && error.response.data.error) {
@@ -50,6 +55,20 @@ export default function AddNotes() {
                 </div>
             )}
             <div className="w-full flex flex-col sm:flex-row gap-4 items-center">
+                <div className="flex-1 w-full">
+                    <label className="text-xs text-gray-400 mb-1 block" htmlFor="add-category">Category</label>
+                    <select
+                        id="add-category"
+                        value={category}
+                        onChange={handleCategoryChange}
+                        className="w-full px-4 py-2 rounded-lg bg-black border border-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition mb-2"
+                    >
+                        <option value="Personal">Personal</option>
+                        <option value="Work">Work</option>
+                        <option value="Fitness">Fitness</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
                 <div className="flex-1 w-full">
                     <label className="text-xs text-gray-400 mb-1 block" htmlFor="add-title">Title</label>
                     <input
