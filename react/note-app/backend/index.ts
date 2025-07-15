@@ -119,6 +119,9 @@ app.post('/submit', authenticateToken, async (req: AuthenticatedRequest, res: Re
     try {
         const { title, description } = req.body;
         const userId = req.user.userId;
+        if (!title || !description) {   
+            return res.status(400).json({ error: 'Title and description are required' });
+        }
         const result = await pool.query(
             `INSERT INTO notes (title, description, user_id) VALUES ($1, $2, $3)`,
             [title, description, userId]
@@ -158,6 +161,10 @@ app.delete('/delete/:id', authenticateToken, async (req: AuthenticatedRequest, r
 app.put('/update/:id', authenticateToken, async (req: AuthenticatedRequest, res: Response) => {
     const { id } = req.params;
     const { title, description } = req.body;
+    if (!title || !description) {
+        return res.status(400).json({ error: 'Title and description are required' });
+    }
+
     const userId = req.user.userId;
     try {
         await pool.query(
@@ -167,6 +174,7 @@ app.put('/update/:id', authenticateToken, async (req: AuthenticatedRequest, res:
         res.status(200).json({ message: "Note updated successfully" });
     } catch (err) {
         console.error(err);
+
         res.status(500).json({ error: "Failed to update note" });
     }
 });
