@@ -26,16 +26,17 @@ export default function ShowNotes() {
 
   const handleDeleteNote = async (id: string) => {
     const token = localStorage.getItem('token');
-    try{
-      const response = await axios.delete(`http://localhost:3001/delete/${id}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+    const previousNotes = notesState;
+    setNotesState(notesState.filter((note) => note.id !== id));
+
+    try {
+      await axios.delete(`http://localhost:3001/delete/${id}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
       });
-      console.log(response.data);
-      setNotesState(notesState.filter((note) => note.id !== id));
     } catch (error) {
+      setNotesState(previousNotes); 
       console.error("Error deleting note:", error);
+      alert("Failed to delete note. Please try again.");
     }
   };
 
